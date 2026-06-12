@@ -1,0 +1,45 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class ProductSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::table('products')->insert([
+            [
+                'name' => 'Mobile Legends',
+                'slug' => 'mobile-legends',
+                'description' => 'Top Up Mobile Legends',
+                'price' => 10000,
+                'image_url' => 'https://i.imgur.com/8Km9tLL.jpeg',
+                'stock' => 999,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Free Fire',
+                'slug' => 'free-fire',
+                'description' => 'Top Up Free Fire',
+                'price' => 12000,
+                'image_url' => 'https://i.imgur.com/4QyZ4yM.jpeg',
+                'stock' => 999,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Valorant',
+                'slug' => 'valorant',
+                'description' => 'Top Up Valorant',
+                'price' => 15000,
+                'image_url' => 'https://i.imgur.com/BcK6Y6L.jpeg',
+                'stock' => 999,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+}
