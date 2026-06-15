@@ -1,26 +1,32 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.2-fpm
 
-# Install system dependencies & PHP extensions
-RUN apk add --no-cache nginx supervisor mariadb-client shadow bash
-RUN docker-php-ext-install pdo_mysql
+# Install dependensi sistem
+RUN apt-get update && apt-get install -y \
+    git curl libpng-dev libonig-dev libxml2-dev zip unzip nginx
 
-# Setup document root
-WORKDIR /var/www/html
+# Bersihkan cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy existing application directory contents
-COPY . /var/www/html
+# Install ekstensi PHP untuk MySQL
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Install Composer
+# Ambil Composer terbaru
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader
 
-# Copy nginx and supervisor configs
-COPY ./docker/nginx.conf /etc/nginx/nginx.conf
-COPY ./docker/supervisor.conf /etc/supervisor/conf.d/supervisor.conf
+# Atur folder kerja
+WORKDIR /var/www
+COPY . /var/www
 
-# Adjust permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Install dependensi Laravel tanpa dev tools
+RUN composer install --no-dev --no-scripts --optimize-autoloader
 
-EXPOSE 80
+# Atur konfigurasi Nginx untuk Hugging Face (Port 7860)
+COPY docker/nginx.conf /etc/nginx/sites-available/default
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
+# Berikan izin akses folder storage dan cache
+RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
+
+# Hugging Face mewajibkan aplikasi berjalan di port 7860
+EXPOSE 7860
+CMD service nginx start && php-fpm
